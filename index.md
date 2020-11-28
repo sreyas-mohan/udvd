@@ -8,7 +8,7 @@ Rafting           |  Snowboard
 
 Electron Microscopy           |  Fluroscence Microscopy
 :-------------------------:|:-------------------------:
-![](./figures/40Frames.gif) | <img src="./figures/fluoro_1.gif" width="500%">
+![](./figures/40Frames.gif) | <img src="./figures/fluoro_1.gif" width="1000"/>
 
 **Real Microscopy Videos Denoised Using UDVD** UDVD trained on 35 frames of highly noisy electron microscopy data.
 
