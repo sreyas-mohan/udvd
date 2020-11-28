@@ -1,22 +1,25 @@
 This website contains code and pre-trained models from the paper [Unsupervised Deep Video Denoising](https://arxiv.org/abs/2010.12970) by [Dev Sheth](https://www.linkedin.com/in/dev-sheth/) \*, [Sreyas Mohan](https://sreyas-mohan.github.io) \*, [Joshua Vincent](https://crozier.engineering.asu.edu/people/current-graduate-students/josh-vincent/), [Ramon Manzorro](https://crozier.engineering.asu.edu/ramon-manzorro/), [Peter A Crozier](https://crozier.engineering.asu.edu/people/peter-a-crozier/), [Mitesh M Khapra](https://www.cse.iitm.ac.in/~miteshk/), [Eero P Simoncelli](https://www.cns.nyu.edu/~eero/) and [Carlos Fernandez-Granda](https://cims.nyu.edu/~cfgranda/) [\* - Equal Contribution].
 
-Deep convolutional neural networks (CNNs)   currently achieve state-of-the-art performance in denoising videos. They are typically trained with supervision, minimizing the error between the network output and ground-truth clean videos. However, in many applications, such as microscopy, noiseless videos are not available. To address these cases, we build on recent advances in unsupervised still image denoising to develop an Unsupervised Deep Video Denoiser (UDVD). UDVD is shown to perform competitively with current state-of-the-art supervised methods on benchmark datasets, even when trained only on a single short noisy video sequence. Experiments on fluorescence-microscopy and electron-microscopy data illustrate the promise of our approach for imaging modalities where  ground-truth clean data is generally not available. In addition, we study the mechanisms used by trained CNNs to perform video denoising.  An analysis of the gradient of the network output with respect to its input reveals that these networks perform spatio-temporal filtering that is adapted to the particular spatial structures and motion of the underlying content. We interpret this as an implicit and highly effective form of motion compensation, a widely used paradigm in traditional video denoising, compression, and analysis.
-
-## Results
-
-![result](./figures/result_table.png) 
-
-**Denoising results for natural image data** All networks are trained on the DAVIS train set. Performance values are PSNR of each trained network averaged over held-out test data. UDVD, operating on $5$ frames, outperforms the supervised methods on Set8 and is competitive on the DAVIS test set.  Unsupervised denoisers with more temporal frames show a consistent improvement in denoising performance. DVDnet and FastDVDnet are trained using varying noise levels ($\sigma \in [0, 55]$) and VNLnet is trained and evaluated on each specified noise level. All unsupervised CNNs are trained ***only*** at $\sigma=30$, showing that they generalize well on unseen noise levels. See paper for additional results.
-
 Rafting           |  Snowboard
 :-------------------------:|:-------------------------:
 ![](./figures/rafting.gif)  |  ![](./figures/snowboard.gif)
 
 **Natural Image Videos Denoised Using UDVD** UDVD trained on the DAVIS train set applied to noisy natural image videos. 
 
-![result](./figures/40Frames.gif) 
+Electron Microscopy           |  Fluroscence Microscopy
+:-------------------------:|:-------------------------:
+![](./figures/40Frames.gif) 
+![](./figures/fluoro_1.gif)
 
-**Electron Microscopy Videos Denoised Using UDVD** UDVD trained on 35 frames of highly noisy electron microscopy data.  
+**Real Microscopy Videos Denoised Using UDVD** UDVD trained on 35 frames of highly noisy electron microscopy data.
+
+Deep convolutional neural networks (CNNs)   currently achieve state-of-the-art performance in denoising videos. They are typically trained with supervision, minimizing the error between the network output and ground-truth clean videos. However, in many applications, such as microscopy, noiseless videos are not available. To address these cases, we build on recent advances in unsupervised still image denoising to develop an Unsupervised Deep Video Denoiser (UDVD). UDVD is shown to perform competitively with current state-of-the-art supervised methods on benchmark datasets, even when trained only on a single short noisy video sequence. Experiments on fluorescence-microscopy and electron-microscopy data illustrate the promise of our approach for imaging modalities where  ground-truth clean data is generally not available. In addition, we study the mechanisms used by trained CNNs to perform video denoising.  An analysis of the gradient of the network output with respect to its input reveals that these networks perform spatio-temporal filtering that is adapted to the particular spatial structures and motion of the underlying content. We interpret this as an implicit and highly effective form of motion compensation, a widely used paradigm in traditional video denoising, compression, and analysis.
+
+## Results
+
+![result](./figures/result_table.png) 
+
+**Denoising results for natural image data** All networks are trained on the DAVIS train set. Performance values are PSNR of each trained network averaged over held-out test data. UDVD, operating on $5$ frames, outperforms the supervised methods on Set8 and is competitive on the DAVIS test set.  Unsupervised denoisers with more temporal frames show a consistent improvement in denoising performance. DVDnet and FastDVDnet are trained using varying noise levels ($\sigma \in [0, 55]$) and VNLnet is trained and evaluated on each specified noise level. All unsupervised CNNs are trained ***only*** at $\sigma=30$, showing that they generalize well on unseen noise levels. See paper for additional results.  
 
 
 ## Architecture
