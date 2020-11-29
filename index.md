@@ -12,16 +12,12 @@ Fluroscence Microscopy 1 | Fluroscence Microscopy 2
 :-------------------------:|:-------------------------:
 <img src="./figures/fluoro_1.gif" width="500"/> | <img src="./figures/fluoro_2.gif" width="500"/>
 
-Electron Microscopy
-:-----------------------------------------------------:
-<img src="./figures/40Frames.gif" width="500"/>
-
 <table>
  <tr>
   <th align="center"> Electron Microscopy </th>
  </tr>
  <tr>
-  <td align="center"> <img src="./figures/40Frames.gif" width="500"/> </td>
+  <td align="center"> <img src="./figures/40Frames.gif" width="1000"/> </td>
  </tr>
 </table>
  
