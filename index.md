@@ -9,10 +9,10 @@ Rafting           |  Snowboard
 **Natural Image Videos Denoised Using UDVD** UDVD trained on the DAVIS train set applied to noisy natural image videos. 
 
 Fluroscence Microscopy
-:-------------------------:
+:-------------------------:|:-------------------------:
 <img src="./figures/fluoro_1.gif" width="500"/> | <img src="./figures/fluoro_2.gif" width="500"/>
+
 Electron Microscopy
-:-------------------------:
 <img src="./figures/40Frames.gif" width="500"/>
 
 **Real Microscopy Videos Denoised Using UDVD** UDVD trained on real microscopy datasets. 
