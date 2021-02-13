@@ -8,7 +8,7 @@ Rafting           |  Snowboard
 
 **Natural Image Videos Denoised Using UDVD** UDVD trained on the DAVIS train set applied to noisy natural image videos. 
 
-Fluroscence Microscopy 1 | Fluroscence Microscopy 2
+Fluorescence Microscopy 1 | Fluorescence Microscopy 2
 :-------------------------:|:-------------------------:
 <img src="./figures/fluoro_1.gif" width="500"/> | <img src="./figures/fluoro_2.gif" width="500"/>
 
