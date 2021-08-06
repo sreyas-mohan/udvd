@@ -1,8 +1,8 @@
 import os
 import os.path
-# import cv2
+import cv2
 import glob
-# import h5py
+import h5py
 from PIL import Image
 import skimage
 import skimage.io
@@ -94,11 +94,11 @@ def load_Nanoparticles(data, batch_size=8, image_size=None, stride=64, n_frames=
     return train_loader, test_loader
 
 @register_dataset("RawVideo")
-def load_RawVideo(data, batch_size=8, image_size=None, stride=64, n_frames=5, aug=0):
+def load_RawVideo(data, batch_size=8, image_size=None, stride=64, n_frames=5, aug=0, scenes=[7, 8, 9, 10, 11], isos = [1600, 3200, 6400, 12800, 25600]):
 
-    train_dataset = RawVideo(data, datatype="train", patch_size=image_size, stride=stride, n_frames=n_frames, aug=aug, isos=[1600])
-    valid_dataset = RawVideo(data, datatype="val", patch_size=1080, stride=1920-1080, n_frames=n_frames, aug=0, isos=[1600])
-    test_dataset = RawVideo(data, datatype="test", patch_size=None, stride=64, n_frames=n_frames, aug=0, isos=[1600])
+    train_dataset = RawVideo(data, datatype="train", patch_size=image_size, stride=stride, n_frames=n_frames, aug=aug, scenes=scenes, isos=isos)
+    valid_dataset = RawVideo(data, datatype="val", patch_size=1080, stride=1920-1080, n_frames=n_frames, aug=0, scenes=scenes, isos=isos)
+    test_dataset = RawVideo(data, datatype="test", patch_size=None, stride=64, n_frames=n_frames, aug=0, scenes=scenes, isos=isos)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=2, shuffle=True)
     valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=1, num_workers=1, shuffle=False)
@@ -164,17 +164,12 @@ class DAVIS(torch.utils.data.Dataset):
         files = sorted(glob.glob(os.path.join(self.data_path, "JPEGImages", "480p", folder, "*.jpg")))
 
         Img = Image.open(files[index])
-#         if self.size is not None:
-#             i, j, h, w = transforms.RandomCrop.get_params(Img, output_size=(self.size, self.size))
-#             Img = TF.crop(Img, i, j, h ,w)
         Img = np.array(Img)
 
         for i in range(1,x+1):
             end = max(0, ends)
             off = max(0,i-x+end)
             img = Image.open(files[index-i+off])
-#             if self.size is not None:
-#                 img = TF.crop(img, i, j, h ,w)
             img = np.array(img)
             Img = np.concatenate((img, Img), axis=2)
 
@@ -182,8 +177,6 @@ class DAVIS(torch.utils.data.Dataset):
             end = -min(0,ends)
             off = max(0,i-x+end)
             img = Image.open(files[index+i-off])
-#             if self.size is not None:
-#                 img = TF.crop(img, i, j, h ,w)
             img = np.array(img)
             Img = np.concatenate((Img, img), axis=2)
 
@@ -250,87 +243,87 @@ class ImageDAVIS(torch.utils.data.Dataset):
 
         return self.transform(Img).type(torch.FloatTensor)
 
-# class CTC(torch.utils.data.Dataset):
-#     def __init__(self, data_path, patch_size=None, stride=64, n_frames=5):
-#         super().__init__()
-#         self.data_path = data_path
-#         self.size = patch_size
-#         self.stride = stride
-#         self.len = 0
-#         self.bounds = [0]
-#         self.nHs = []
-#         self.nWs = []
-#         self.n_frames = n_frames
+class CTC(torch.utils.data.Dataset):
+    def __init__(self, data_path, patch_size=None, stride=64, n_frames=5):
+        super().__init__()
+        self.data_path = data_path
+        self.size = patch_size
+        self.stride = stride
+        self.len = 0
+        self.bounds = [0]
+        self.nHs = []
+        self.nWs = []
+        self.n_frames = n_frames
 
-#         parent_folders = sorted([x for x in glob.glob(os.path.join(data_path, "*/*")) if os.path.isdir(x)])
-#         self.folders = []
-#         for folder in parent_folders:
-#             self.folders.append(os.path.join(folder, "01"))
-#             self.folders.append(os.path.join(folder, "02"))
-#         for folder in self.folders:
-#             files = sorted(glob.glob(os.path.join(folder, "*.tif")))
-#             if self.size is not None:
-#                 (h, w) = np.array(cv2.imread(files[0], cv2.IMREAD_GRAYSCALE)).shape
-#                 nH = (int((h-self.size)/self.stride)+1)
-#                 nW = (int((w-self.size)/self.stride)+1)
-#                 self.len += len(files)*nH*nW
-#                 self.nHs.append(nH)
-#                 self.nWs.append(nW)
-#             else:
-#                 self.len += len(files)
-#             self.bounds.append(self.len)
+        parent_folders = sorted([x for x in glob.glob(os.path.join(data_path, "*/*")) if os.path.isdir(x)])
+        self.folders = []
+        for folder in parent_folders:
+            self.folders.append(os.path.join(folder, "01"))
+            self.folders.append(os.path.join(folder, "02"))
+        for folder in self.folders:
+            files = sorted(glob.glob(os.path.join(folder, "*.tif")))
+            if self.size is not None:
+                (h, w) = np.array(cv2.imread(files[0], cv2.IMREAD_GRAYSCALE)).shape
+                nH = (int((h-self.size)/self.stride)+1)
+                nW = (int((w-self.size)/self.stride)+1)
+                self.len += len(files)*nH*nW
+                self.nHs.append(nH)
+                self.nWs.append(nW)
+            else:
+                self.len += len(files)
+            self.bounds.append(self.len)
 
-#         self.transform = transforms.Compose([transforms.ToTensor()])
+        self.transform = transforms.Compose([transforms.ToTensor()])
 
-#     def __len__(self):
-#         return self.len
+    def __len__(self):
+        return self.len
 
-#     def __getitem__(self, index):
-#         ends = 0
-#         x = (self.n_frames-1) // 2
-#         for i, bound in enumerate(self.bounds):
-#             if index < bound:
-#                 folder = self.folders[i-1]
-#                 index -= self.bounds[i-1]
-#                 newbound = bound - self.bounds[i-1]
-#                 if self.size is not None:
-#                     nH = self.nHs[i-1]
-#                     nW = self.nWs[i-1]
-#                     patch = index % (nH*nW)
-#                     index = index // (nH*nW)
-#                     newbound = newbound // (nH*nW)
-#                 if(index < x):
-#                     ends = x-index
-#                 elif(newbound-1-index < x):
-#                     ends = -(x-(newbound-1-index))
-#                 break
+    def __getitem__(self, index):
+        ends = 0
+        x = (self.n_frames-1) // 2
+        for i, bound in enumerate(self.bounds):
+            if index < bound:
+                folder = self.folders[i-1]
+                index -= self.bounds[i-1]
+                newbound = bound - self.bounds[i-1]
+                if self.size is not None:
+                    nH = self.nHs[i-1]
+                    nW = self.nWs[i-1]
+                    patch = index % (nH*nW)
+                    index = index // (nH*nW)
+                    newbound = newbound // (nH*nW)
+                if(index < x):
+                    ends = x-index
+                elif(newbound-1-index < x):
+                    ends = -(x-(newbound-1-index))
+                break
 
-#         files = sorted(glob.glob(os.path.join(folder, "*.tif")))
+        files = sorted(glob.glob(os.path.join(folder, "*.tif")))
 
-#         img = cv2.imread(files[index], cv2.IMREAD_GRAYSCALE)
-#         (h, w) = np.array(img).shape
-#         Img = np.reshape(np.array(img), (h,w,1))
+        img = cv2.imread(files[index], cv2.IMREAD_GRAYSCALE)
+        (h, w) = np.array(img).shape
+        Img = np.reshape(np.array(img), (h,w,1))
 
-#         for i in range(1,x+1):
-#             end = max(0, ends)
-#             off = max(0,i-x+end)
-#             img = cv2.imread(files[index-i+off], cv2.IMREAD_GRAYSCALE)
-#             img = np.reshape(np.array(img), (h,w,1))
-#             Img = np.concatenate((img, Img), axis=2)
+        for i in range(1,x+1):
+            end = max(0, ends)
+            off = max(0,i-x+end)
+            img = cv2.imread(files[index-i+off], cv2.IMREAD_GRAYSCALE)
+            img = np.reshape(np.array(img), (h,w,1))
+            Img = np.concatenate((img, Img), axis=2)
 
-#         for i in range(1,x+1):
-#             end = -min(0,ends)
-#             off = max(0,i-x+end)
-#             img = cv2.imread(files[index+i-off], cv2.IMREAD_GRAYSCALE)
-#             img = np.reshape(np.array(img), (h,w,1))
-#             Img = np.concatenate((Img, img), axis=2)
+        for i in range(1,x+1):
+            end = -min(0,ends)
+            off = max(0,i-x+end)
+            img = cv2.imread(files[index+i-off], cv2.IMREAD_GRAYSCALE)
+            img = np.reshape(np.array(img), (h,w,1))
+            Img = np.concatenate((Img, img), axis=2)
 
-#         if self.size is not None:
-#             nh = (patch // nW)*self.stride
-#             nw = (patch % nW)*self.stride
-#             Img = Img[nh:(nh+self.size), nw:(nw+self.size), :]
+        if self.size is not None:
+            nh = (patch // nW)*self.stride
+            nw = (patch % nW)*self.stride
+            Img = Img[nh:(nh+self.size), nw:(nw+self.size), :]
 
-#         return self.transform(Img).type(torch.FloatTensor)
+        return self.transform(Img).type(torch.FloatTensor)
 
 class SingleVideo(torch.utils.data.Dataset):
     def __init__(self, data_path, dataset="DAVIS", video="giant-slalom", patch_size=None, stride=64, n_frames=5,
@@ -370,11 +363,8 @@ class SingleVideo(torch.utils.data.Dataset):
         if not dataset == "Nanoparticles":
             os.makedirs(os.path.join(data_path, f"Noisy_Videos_{int(noise_std)}"), exist_ok=True)
             os.makedirs(os.path.join(data_path, f"Noisy_Videos_{int(noise_std)}", video), exist_ok=True)
-            #os.makedirs(os.path.join(data_path, "Noisy_Videos"), exist_ok=True#)
-            #os.makedirs(os.path.join(data_path, "Noisy_Videos", video), exist_ok=True)
 
             self.noisy_folder = os.path.join(data_path, f"Noisy_Videos_{int(noise_std)}", video)
-            #self.noisy_folder = os.path.join(data_path, "Noisy_Videos", video)
 
             if sample:
                 for i in range(self.len):
@@ -384,8 +374,6 @@ class SingleVideo(torch.utils.data.Dataset):
                     Noise = utils.get_noise(Img, dist=dist, mode=mode, min_noise=min_noise, max_noise=max_noise, noise_std=noise_std).numpy()
                     Img = Img + Noise
                     np.save(os.path.join(self.noisy_folder, os.path.basename(self.files[i])[:-3]+".npy"), Img)
-                    # Img = self.reverse(Img)
-                    # Img.save(os.path.join(self.noisy_folder, os.path.basename(self.files[i])))
             self.noisy_files = sorted(glob.glob(os.path.join(self.noisy_folder, "*.npy")))
 
         if self.size is not None:
@@ -414,15 +402,12 @@ class SingleVideo(torch.utils.data.Dataset):
         if self.aug >= 3: # Variable Frame Rate
             hop = index % 4 + 1
             index = index // 4
-#             hop = np.random.randint(4) + 1
         if self.aug >= 2: # Reverse the Video
             reverse = index % 2
             index = index // 2
-#             reverse = np.random.randint(2)
         if self.aug >= 1: # Horizonatal and Vertical Flips
             flip = index % 4
             index = index // 4
-#             flip = np.random.randint(4)
 
         if self.size is not None:
             patch = index % self.n_patches
@@ -491,7 +476,6 @@ class SingleVideo(torch.utils.data.Dataset):
             Img = np.flip(Img, (1,0))
             noisy_Img = np.flip(noisy_Img, (2,1))
 
-        # return self.transform(np.array(Img)).type(torch.FloatTensor)
         return self.transform(np.array(Img)).type(torch.FloatTensor), torch.from_numpy(noisy_Img.copy())
 
 class Nanoparticles(torch.utils.data.Dataset):
@@ -508,7 +492,7 @@ class Nanoparticles(torch.utils.data.Dataset):
         if datatype == "train":
             self.files = self.files[0:35]
         elif datatype == "test":
-            self.files = self.files#[35:40] # change this based on use 35:40 for heldout
+            self.files = self.files
 
         self.len = self.bound = len(self.files)
         self.transform = transforms.Compose([transforms.ToTensor()])
@@ -543,15 +527,12 @@ class Nanoparticles(torch.utils.data.Dataset):
         if self.aug >= 3: # Variable Frame Rate
             hop = index % 4 + 1
             index = index // 4
-#             hop = np.random.randint(4) + 1
         if self.aug >= 2: # Reverse the Video
             reverse = index % 2
             index = index // 2
-#             reverse = np.random.randint(2)
         if self.aug >= 1: # Horizonatal and Vertical Flips
             flip = index % 4
             index = index // 4
-#             flip = np.random.randint(4)
 
         if self.size is not None:
             patch = index % self.n_patches
@@ -763,6 +744,4 @@ class RawVideo(torch.utils.data.Dataset):
         Img = (Img-240)/(2**12-1-240)
         noisy_Img = (noisy_Img-240)/(2**12-1-240)
 
-        # return self.transform(np.array(Img)).type(torch.FloatTensor)
-        # return self.transform(np.array(Img)).type(torch.FloatTensor), torch.from_numpy(noisy_Img.copy())
         return self.transform(np.array(Img)).type(torch.FloatTensor), self.transform(np.array(noisy_Img)).type(torch.FloatTensor)
