@@ -23,9 +23,7 @@ def main(args):
     model = nn.DataParallel(model)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-#     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 60, 70, 80, 90, 100], gamma=0.5)
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,18], gamma=0.5)
-#     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=10, threshold=0.001, threshold_mode='abs', min_lr=5e-6)
     logging.info(f"Built a model consisting of {sum(p.numel() for p in model.parameters()):,} parameters")
 
     if args.resume_training:
@@ -40,7 +38,6 @@ def main(args):
 
     # Track moving average of loss values
     train_meters = {name: utils.RunningAverageMeter(0.98) for name in (["train_loss", "train_psnr", "train_ssim"])}
-    # frame_meters = {name: utils.RunningAverageMeter(0.98) for name in (["frame_loss", "frame_psnr", "frame_ssim"])}
     if args.loss == "loglike":
         mean_meters = {name: utils.AverageMeter() for name in (["mean_psnr", "mean_ssim"])}
     valid_meters = {name: utils.AverageMeter() for name in (["valid_loss", "valid_psnr", "valid_ssim"])}
@@ -60,8 +57,6 @@ def main(args):
                 meter.reset()
 
         for batch_id, (inputs, noisy_inputs) in enumerate(train_bar):
-#             if batch_id > 100:
-#                 break
             model.train()
 
             global_step += 1
@@ -134,8 +129,6 @@ def main(args):
                 valid_bar = utils.ProgressBar(valid_loader)
                 running_valid_psnr = 0.0
                 for sample_id, (sample, noisy_inputs) in enumerate(valid_bar):
-#                     if sample_id > 50:
-#                         break
                     with torch.no_grad():
                         sample = sample.to(device)
                         noisy_inputs = noisy_inputs.to(device)
@@ -180,7 +173,6 @@ def main(args):
                 else:
                     logging.info("EVAL:"+train_bar.print(dict(**valid_meters, lr=optimizer.param_groups[0]["lr"])))
                 utils.save_checkpoint(args, global_step, model, optimizer, score=valid_meters["valid_loss"].avg, mode="min")
-#                 scheduler.step(running_valid_psnr)
         scheduler.step()
 
         if args.loss == "loglike":
@@ -188,7 +180,6 @@ def main(args):
         else:
             logging.info(train_bar.print(dict(**train_meters, lr=optimizer.param_groups[0]["lr"])))
 
-            # if (batch_id+1) % int(174636/4) == 0:
         if (epoch+1) % args.valid_interval == 0:
             model.eval()
             for meter in valid_meters.values():
@@ -200,8 +191,6 @@ def main(args):
             valid_bar = utils.ProgressBar(valid_loader)
             running_valid_psnr = 0.0
             for sample_id, (sample, noisy_inputs) in enumerate(valid_bar):
-#                 if sample_id > 50:
-#                     break
                 with torch.no_grad():
                     sample = sample.to(device)
                     noisy_inputs = noisy_inputs.to(device)
@@ -246,13 +235,6 @@ def main(args):
             else:
                 logging.info("EVAL:"+train_bar.print(dict(**valid_meters, lr=optimizer.param_groups[0]["lr"])))
             utils.save_checkpoint(args, global_step, model, optimizer, score=valid_meters["valid_loss"].avg, mode="min")
-#             scheduler.step(running_valid_psnr)
-
-#         if (epoch+1) % args.valid_interval == 0:
-#             utils.save_checkpoint(args, global_step, model, optimizer, score=train_meters["train_psnr"].avg, mode="max")
-
-    # input_psnr = utils.psnr(noisy_inputs, sample)
-    # print(input_psnr)
 
     logging.info(f"Done training! Best PSNR {utils.save_checkpoint.best_score:.3f} obtained after step {utils.save_checkpoint.best_step}.")
 
