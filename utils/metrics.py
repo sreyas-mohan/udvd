@@ -2,7 +2,7 @@ import numpy as np
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 
 
-def ssim(clean, noisy, normalized=False, raw=True):
+def ssim(clean, noisy, normalized=True, raw=False):
     """Use skimage.meamsure.compare_ssim to calculate SSIM
     Args:
         clean (Tensor): (B, 1, H, W)
@@ -27,7 +27,7 @@ def ssim(clean, noisy, normalized=False, raw=True):
         return np.array([structural_similarity(c, n, data_range=1.0, multichannel=True) for c, n in zip(clean, noisy)]).mean()
 
 
-def psnr(clean, noisy, normalized=False, raw=True):
+def psnr(clean, noisy, normalized=True, raw=False):
     """Use skimage.meamsure.compare_ssim to calculate SSIM
     Args:
         clean (Tensor): (B, 1, H, W)
