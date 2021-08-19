@@ -1,6 +1,6 @@
 # Unsupervised Deep Video Denoising 
 
-To appear at **IEEE/CVF International Conference on Computer Vision (ICCV), 2021**.
+To appear at **2021 IEEE/CVF International Conference on Computer Vision (ICCV)**.
 
 Authors: **Dev Yashpal Sheth\*, Sreyas Mohan\*, Joshua Vincent, Ramon Manzorro, Peter A Crozier, Mitesh M Khapra, Eero P Simoncelli and Carlos Fernandez-Granda** [\* - Equal Contribution].
 
