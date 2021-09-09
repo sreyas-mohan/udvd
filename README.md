@@ -1,3 +1,7 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unsupervised-deep-video-denoising/video-denoising-on-set8-sigma30)](https://paperswithcode.com/sota/video-denoising-on-set8-sigma30?p=unsupervised-deep-video-denoising)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unsupervised-deep-video-denoising/video-denoising-on-set8-sigma40)](https://paperswithcode.com/sota/video-denoising-on-set8-sigma40?p=unsupervised-deep-video-denoising)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/unsupervised-deep-video-denoising/video-denoising-on-set8-sigma50)](https://paperswithcode.com/sota/video-denoising-on-set8-sigma50?p=unsupervised-deep-video-denoising)
+
 # Unsupervised Deep Video Denoising 
 
 To appear at **IEEE/CVF International Conference on Computer Vision (ICCV), 2021**.
