@@ -57,6 +57,12 @@ def load_ImageDAVIS(data, batch_size=100, num_workers=0, image_size=None, stride
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, num_workers=4, shuffle=False)
     return train_loader, valid_loader, test_loader
 
+@register_dataset("Set8")
+def load_Set8(data, batch_size=100, num_workers=0, n_frames=5):
+    test_dataset = Set8(data, n_frames=n_frames)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, num_workers=8, shuffle=False)
+    return test_loader
+
 @register_dataset("CTC")
 def load_CTC(data, batch_size=100, num_workers=0, image_size=None, stride=64, n_frames=5):
     train_dataset = CTC(data, patch_size=image_size, stride=stride, n_frames=n_frames)
@@ -240,6 +246,72 @@ class ImageDAVIS(torch.utils.data.Dataset):
             nh = (patch // self.n_W)*self.stride
             nw = (patch % self.n_W)*self.stride
             Img = Img[nh:(nh+self.size), nw:(nw+self.size), :]
+
+        return self.transform(Img).type(torch.FloatTensor)
+    
+class Set8(torch.utils.data.Dataset):
+    def __init__(self, data_path, n_frames=5, hop=1):
+        super().__init__()
+        self.data_path = data_path
+        self.len = 0
+        self.bounds = []
+        self.hop = hop
+        self.n_frames = n_frames
+
+        self.folders = []
+        self.folders += sorted(glob.glob(os.path.join(data_path, "GoPro/snowboard")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "GoPro/hypersmooth")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "GoPro/rafting")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "GoPro/motorbike")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "Derfs/tractor")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "Derfs/sunflower")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "Derfs/touchdown")))
+        self.folders += sorted(glob.glob(os.path.join(data_path, "Derfs/park_joy")))
+        for folder in self.folders:
+            files = sorted(glob.glob(os.path.join(folder, "*.png")))
+            self.len += len(files)
+            self.bounds.append(self.len)
+
+        self.transform = transforms.Compose([transforms.ToTensor()])
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, index):
+        ends = 0
+        x = ((self.n_frames-1) // 2)*self.hop
+        for i, bound in enumerate(self.bounds):
+            if index < bound:
+                folder = self.folders[i]
+                if i>0:
+                    index -= self.bounds[i-1]
+                    newbound = bound - self.bounds[i-1]
+                else:
+                    newbound = bound
+                if(index < x):
+                    ends = x-index
+                elif(newbound-1-index < x):
+                    ends = -(x-(newbound-1-index))
+                break
+    
+        files = sorted(glob.glob(os.path.join(folder, "*.png")))
+        
+        Img = Image.open(files[index])
+        Img = np.array(Img)
+
+        for i in range(self.hop, x+1, self.hop):
+            end = max(0, ends)
+            off = max(0,i-x+end)
+            img = Image.open(files[index-i+off])
+            img = np.array(img)
+            Img = np.concatenate((img, Img), axis=2)
+        
+        for i in range(self.hop, x+1, self.hop):
+            end = -min(0,ends)
+            off = max(0,i-x+end)
+            img = Image.open(files[index+i-off])
+            img = np.array(img)
+            Img = np.concatenate((Img, img), axis=2)
 
         return self.transform(Img).type(torch.FloatTensor)
 
