@@ -2,6 +2,8 @@ import importlib
 import os
 import torch.nn as nn
 
+from .fastdvdnet import *
+
 
 MODEL_REGISTRY = {}
 
