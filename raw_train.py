@@ -23,7 +23,7 @@ def main(args):
     model = nn.DataParallel(model)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,18], gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[2,3], gamma=0.5)
     logging.info(f"Built a model consisting of {sum(p.numel() for p in model.parameters()):,} parameters")
 
     if args.resume_training:
